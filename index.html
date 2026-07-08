@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 4: Ultimate Photo Walkthrough ❤️</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Poppins:wght=300;400;600;800&family=Caveat:wght=700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #020208;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            background: radial-gradient(circle at center, #0d1b2a 0%, #010204 100%);
+        }
+
+        .terminal-style {
+            font-family: 'Share Tech Mono', monospace !important;
+            border: 2px solid #00e5ff !important;
+            background: rgba(10, 25, 47, 0.85) !important;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.2) !important;
+        }
+
+        .stage {
+            position: absolute;
+            width: 92%;
+            max-width: 460px;
+            padding: 35px 25px;
+            background: rgba(26, 11, 46, 0.85);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1.5px solid rgba(255, 71, 126, 0.3);
+            border-radius: 32px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.8);
+            z-index: 10;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(60px) scale(0.92);
+            pointer-events: none;
+            transition: all 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .stage.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+            z-index: 12;
+        }
+
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #ff477e, #00e5ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+
+        .story-text {
+            font-size: 1.02rem;
+            line-height: 1.6;
+            color: #d1f7ff;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00e5ff, #ff477e);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 229, 255, 0.3);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(255, 71, 126, 0.5);
+        }
+
+        /* INDIVIDUAL DISPLAY IMAGE FRAME */
+        .single-photo-frame {
+            width: 100%;
+            height: 250px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid #ff477e;
+            margin-bottom: 20px;
+            box-shadow: 0 15px 35px rgba(255, 71, 126, 0.25);
+        }
+
+        .single-photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* VIDEO CONTAINER */
+        .video-container {
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid #00e5ff;
+            background: black;
+            margin-bottom: 20px;
+            box-shadow: 0 15px 35px rgba(0, 229, 255, 0.25);
+        }
+        video {
+            width: 100%;
+            display: block;
+        }
+
+        /* TEXT QUOTES */
+        .quote-box-tamil {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            color: #ffe6ee;
+            background: rgba(255, 71, 126, 0.08);
+            border-left: 5px solid #ff477e;
+            padding: 15px;
+            border-radius: 0 15px 15px 0;
+            text-align: left;
+            margin: 15px 0;
+        }
+
+        .quote-box-english {
+            font-size: 1.05rem;
+            color: #e2f9ff;
+            font-style: italic;
+            background: rgba(0, 229, 255, 0.08);
+            border-right: 5px solid #00e5ff;
+            padding: 15px;
+            border-radius: 15px 0 0 15px;
+            text-align: right;
+            margin: 15px 0;
+        }
+
+        /* HOURGLASS TIMER */
+        .hourglass-wrapper {
+            position: relative;
+            width: 90px;
+            height: 130px;
+            margin: 15px auto;
+        }
+        .hourglass-frame {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            animation: flipHourglass 10s infinite steps(1);
+        }
+        .glass-top, .glass-bottom {
+            position: absolute;
+            left: 15%;
+            width: 70%;
+            height: 55px;
+            border: 2px solid #00e5ff;
+            overflow: hidden;
+        }
+        .glass-top { top: 5px; border-radius: 50% 50% 20% 20%; }
+        .glass-bottom { bottom: 5px; border-radius: 20% 20% 50% 50%; }
+        .sand-top {
+            width: 100%; height: 100%; background: #ff477e;
+            transform-origin: bottom; animation: drain 10s infinite linear;
+        }
+        .sand-bottom {
+            width: 100%; height: 0%; background: #ff477e;
+            position: absolute; bottom: 0; animation: fill 10s infinite linear;
+        }
+
+        .live-counter {
+            font-size: 1.25rem;
+            color: #00e5ff;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        @keyframes drain { 0% { transform: scaleY(1); } 100% { transform: scaleY(0); } }
+        @keyframes fill { 0% { height: 0%; } 100% { height: 100%; } }
+        @keyframes flipHourglass { 0%, 99% { transform: rotate(0deg); } 100% { transform: rotate(180deg); } }
+
+        .particle-heart {
+            position: absolute;
+            color: #00e5ff;
+            pointer-events: none;
+            opacity: 0;
+            animation: floatUp 5s linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(105vh) scale(0.5); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) scale(1.1); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="bg-canvas"></div>
+    <audio id="bgm" loop><source src="bgm.mp3" type="audio/mpeg"></audio>
+
+    <!-- PAGE 1: NEW CYBER TERMINAL -->
+    <div class="stage active terminal-style" id="stage1">
+        <h1 style="color: #00e5ff;">&gt;_ SYSTEM_DECRYPT: DAY 4</h1>
+        <p class="story-text" style="font-family: monospace; color: #a2f2ff;">
+            [INITIALIZING MODULE]... <br>
+            Design Engine: PHOTO_WALK_v4.0<br>
+            Status: Ready to melt her heart.
+        </p>
+        <p class="story-text">பாஸ்வேர்ட் எல்லாம் கிராக் பண்ணியாச்சு செல்லம்! ஹெட்ஃபோன் மாட்டிட்டு, சவுண்ட் ஃபுல்லா வச்சு இந்த புது உலகத்துக்குள்ள வா!</p>
+        <button class="btn" onclick="triggerAudioAndAdvance(2)">⚡ Enter Live Walkthrough</button>
+    </div>
+
+    <!-- PAGE 2: PHOTO 1 PAGE -->
+    <div class="stage" id="stage2">
+        <h1>Our First Sight 🌸</h1>
+        <div class="single-photo-frame">
+            <img src="photo1.jpg" alt="Memory 1">
+        </div>
+        <p class="story-text">உன்னோட இந்த கியூட் ஸ்மைல பார்க்குறப்போவே என் மனசுக்குள்ள ஏதோ ஒன்னு புதுசா ஆரம்பிச்சதுடி தங்கம்!</p>
+        <button class="btn" onclick="advanceToStage(3)">👉 Next Cute Frame</button>
+    </div>
+
+    <!-- PAGE 3: PHOTO 2 PAGE -->
+    <div class="stage" id="stage3">
+        <h1>The Queen Look 👑</h1>
+        <div class="single-photo-frame">
+            <img src="photo2.jpg" alt="Memory 2">
+        </div>
+        <p class="quote-box-tamil">
+            "விழிகளின் வழியே நுழைந்து என் மொத்த எண்ணங்களையும் திருடிச் சென்றவள் நீ!"
+        </p>
+        <button class="btn" onclick="advanceToStage(4)">👉 Move Forward</button>
+    </div>
+
+    <!-- PAGE 4: PHOTO 3 PAGE -->
+    <div class="stage" id="stage4">
+        <h1>Absolute Angel ✨</h1>
+        <div class="single-photo-frame">
+            <img src="photo3.jpg" alt="Memory 3">
+        </div>
+        <p class="story-text">டெய்லி உன்னை பார்த்துட்டே இருந்தாலும் அலுக்கவே மாட்டேங்குது. நீ என் பக்கத்துல இருக்கும்போது தான் முழுமையா உணர்றேன்!</p>
+        <button class="btn" onclick="advanceToStage(5)">👉 Next Memory Location</button>
+    </div>
+
+    <!-- PAGE 5: PHOTO 4 + 7-SEC VIDEO THEATER -->
+    <div class="stage" id="stage5">
+        <h1>7-Second Theater 🎬</h1>
+        <div class="video-container">
+            <video id="myVideo" controls>
+                <source src="video.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="single-photo-frame" style="height: 100px; border-color: #00e5ff;">
+            <img src="photo4.jpg" alt="Memory 4 Layer">
+        </div>
+        <p class="story-text" style="font-size:0.95rem; margin-top:5px;">இந்த எக்ஸ்பிரஷனை எத்தனை தரம் பார்த்தாலும் பத்தாதுடி என் பொண்டாட்டி!</p>
+        <button class="btn" onclick="playVideoAndProceed(6)">⌛ Load Countdown Box</button>
+    </div>
+
+    <!-- PAGE 6: PHOTO 5 + TIMER PAGE -->
+    <div class="stage" id="stage6">
+        <h1>4 Days To Go! ⏳</h1>
+        <div class="single-photo-frame" style="height: 150px;">
+            <img src="photo5.jpg" alt="Memory 5 Final">
+        </div>
+        
+        <div class="hourglass-wrapper">
+            <div class="hourglass-frame">
+                <div class="glass-top"><div class="sand-top"></div></div>
+                <div class="glass-bottom"><div class="sand-bottom"></div></div>
+            </div>
+        </div>
+        <div class="live-counter" id="timerDisplay">4 Days Left</div>
+        <button class="btn" onclick="advanceToStage(7)" style="margin-top: 15px;">Read My Heart Note 💌</button>
+    </div>
+
+    <!-- PAGE 7: FRESH PREMIUM ENGLISH FLIRT QUOTE -->
+    <div class="stage" id="stage7">
+        <h1>My Forever Confession 💞</h1>
+        <div class="quote-box-english">
+            "They say perfection doesn't exist, but clearly, they haven't seen your smile. Four days from now, the world was blessed with you, and I was blessed with my forever."
+        </div>
+        <p class="story-text">ஒவ்வொரு பக்கமும் உன்னோட நினைவுகளா மாறிடுச்சு பார்த்தியா? நவ், ஃபைனல் மாஸ் அன்லாக்!</p>
+        <button class="btn" onclick="advanceToStage(8)">🚀 UNLOCK CLIMAX CORE</button>
+    </div>
+
+    <!-- PAGE 8: ULTIMATE CLIMAX BANNER -->
+    <div class="stage" id="stage8">
+        <h1>Advance Happy Birthday, En Pondatti! 💍❤️</h1>
+        <h2>Pure Happiness In 4 Days!</h2>
+        <p class="story-text" style="font-family: 'Caveat', cursive; font-size: 1.8rem; color: #ff477e; margin-bottom:10px;">
+            "என் வாழ்க்கையோட ஆகச்சிறந்த அழகான அதிர்ஷ்டம் நீ தான்டி! இன்னைக்கு பார்த்த ஒவ்வொரு போட்டோவும் உனக்கு பிடிச்சிருக்கும்னு நம்புறேன். இன்னும் 4 நாள்ல நீதான் என்னோட மகாராணி!"
+        </p>
+        <h3 style="color:#00e5ff; font-weight:800; text-shadow: 0 0 10px rgba(0,229,255,0.4);">I Love You So Much, My Wifey! 💋</h3>
+    </div>
+
+    <script>
+        function advanceToStage(idx) {
+            document.querySelectorAll('.stage').forEach(stg => stg.classList.remove('active'));
+            document.getElementById('stage' + idx).classList.add('active');
+        }
+
+        function triggerAudioAndAdvance(nextIdx) {
+            const song = document.getElementById("bgm");
+            song.play().catch(e => console.log("BGM Sync Done."));
+            advanceToStage(nextIdx);
+        }
+
+        function playVideoAndProceed(nextIdx) {
+            const vid = document.getElementById("myVideo");
+            vid.pause();
+            advanceToStage(nextIdx);
+        }
+
+        // Exact Countdown Timer for July 13, 2026
+        const targetBirthday = new Date("July 13, 2026 00:00:00").getTime();
+        setInterval(() => {
+            const rightNow = new Date().getTime();
+            const distance = targetBirthday - rightNow;
+            const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((distance % (1000 * 60)) / 1000);
+            if(document.getElementById("timerDisplay")) {
+                document.getElementById("timerDisplay").innerText = `${d}D : ${h}H : ${m}M : ${s}S`;
+            }
+        }, 1000);
+
+        // Cyber particle engine
+        const canvasBg = document.getElementById('bg-canvas');
+        const particles = ['❤️', '✨', '⚡', '💙', '💎'];
+        function spawnCyberParticles() {
+            const p = document.createElement('div');
+            p.classList.add('particle-heart');
+            p.innerText = particles[Math.floor(Math.random() * particles.length)];
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.fontSize = Math.random() * 15 + 10 + 'px';
+            canvasBg.appendChild(p);
+            setTimeout(() => { p.remove(); }, 5000);
+        }
+        setInterval(spawnCyberParticles, 350);
+    </script>
+</body>
+</html>
